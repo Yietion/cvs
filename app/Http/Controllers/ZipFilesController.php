@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Chumper\Zipper\Zipper;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+//use Maatwebsite\Excel\Facades\Excel;
 
 class ZipFilesController extends Controller
 {
@@ -13,33 +15,38 @@ class ZipFilesController extends Controller
     * @param Zipper $zippper
     */
    public function index(Zipper $zippper)
-   {
+   {	
    		$files = $this->my_dir(storage_path().'/zip');
    		if(is_array($files) && !empty($files)){
    			foreach ($files as $file){
-   				$path = storage_path().'/zip/'.explode('.', $file)[0];
+   				$path = storage_path('/app/unzip/'.explode('.', $file)[0]);
    				try {
    					$zippper->make(storage_path().'/zip/'.$file)->extractTo($path);
    				}catch (\Exception $e){
    					return '解压失败';
    				}
    			}
+ 			return "解压成功";
    		}
+   		return "解压失败";
    }
    
-   /**
-    * 
-    */
-   public function readFile(Excel $excel)
+	/**
+	 * readFile 读取文件
+	 * @param \Maatwebsite\Excel\Excel $excel
+	 */
+   public function readFile(\Maatwebsite\Excel\Excel $excel)
    {
 	   	$excel_file_path = storage_path('zip/weather_forecast/weather_forecast/Changzhi_2019030508.csv');
 	   	$res = [];
 	   	$excel->load($excel_file_path, function($reader) use( &$res ) {
 	   		$reader = $reader->getSheet(0);
 	   		$res = $reader->toArray();
-	   	},'GBK');
+	   	},'UTF-8');
 	   	for($i = 1; $i<count($res); $i++){
-	   		dd($res[$i]);
+	   		echo '<pre>';
+	   		var_dump($res[$i]);
+	   		echo '</pre>';
 	   	}
    }
    
